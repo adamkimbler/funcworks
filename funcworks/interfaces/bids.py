@@ -8,7 +8,7 @@ from nipype import logging
 from nipype.utils.filemanip import copyfile
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec,
-    InputMultiPath, OutputMultiPath, File, Directory, Str,
+    InputMultiPath, OutputMultiPath, File, Directory,
     traits, isdefined, SimpleInterface)
 from nipype.interfaces.io import IOBase
 import nibabel as nb
@@ -158,8 +158,7 @@ class _BIDSGetInputSpec(BaseInterfaceInputSpec):
     database_path = Directory(
         exists=True, mandatory=True, desc="Path to BIDS Dataset DBCACHE")
     fixed_entities = traits.Dict(
-        key_trait=Str,
-        value_trait=traits.Dict, desc="Queries for outfield outputs")
+        desc="Queries for outfield outputs")
 
 
 class _BIDSGetOutputSpec(TraitedSpec):
