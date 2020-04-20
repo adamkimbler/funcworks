@@ -250,7 +250,8 @@ def fsl_run_level_wf(model,
         ])
     else:
         workflow.connect([
-            (getter, wrangle_volumes, [('functional_files', 'functional_file')]),
+            (getter, wrangle_volumes, [
+                ('functional_files', 'functional_file')]),
             (getter, get_info, [('functional_files', 'functional_file')]),
         ])
 

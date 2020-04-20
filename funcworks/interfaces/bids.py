@@ -172,7 +172,7 @@ class BIDSGet(SimpleInterface):
 
     input_spec = _BIDSGetInputSpec
     output_spec = _BIDSGetOutputSpec
-    _always_run = False
+    _always_run = True
     _pkg = "bids"
 
     def _run_interface(self, runtime):
@@ -189,3 +189,5 @@ class BIDSGet(SimpleInterface):
                 f'Unable to find functional image with '
                 f'specified entities {functional_entities}')
         self._results['functional_files'] = functional_files
+
+        return runtime
