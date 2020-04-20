@@ -6,6 +6,7 @@ from nipype.interfaces import fsl
 from nipype.interfaces.utility import Function, IdentityInterface, Merge
 from nipype.algorithms import modelgen, rapidart as ra
 from ..interfaces.bids import BIDSGet, BIDSDataSink
+from ..interfaces.fsl import ApplyMask
 from ..interfaces.modelgen import GetRunModelInfo, GenerateHigherInfo
 from ..interfaces.io import MergeAll, CollateWithMetadata
 from ..interfaces.visualization import PlotMatrices
@@ -184,7 +185,7 @@ def fsl_run_level_wf(model,
         name='smooth_susan')
 
     mask_functional = pe.MapNode(
-        fsl.ApplyMask(),
+        ApplyMask(),
         iterfield=['in_file', 'mask_file'],
         name='mask_functional')
 
