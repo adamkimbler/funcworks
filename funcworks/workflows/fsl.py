@@ -243,15 +243,15 @@ def fsl_run_level_wf(model,
     # Setup connections among nodes
     if align_volumes:
         workflow.connect([
-            (getter, realign_runs, [('bold_files', 'in_file')]),
-            (getter, get_info, [('bold_files', 'functional_file')]),
+            (getter, realign_runs, [('functional_files', 'in_file')]),
+            (getter, get_info, [('functional_files', 'functional_file')]),
             (get_info, realign_runs, [('reference_image', 'ref_file')]),
             (realign_runs, wrangle_volumes, [('out_file', 'functional_file')])
         ])
     else:
         workflow.connect([
-            (getter, wrangle_volumes, [('bold_files', 'functional_file')]),
-            (getter, get_info, [('bold_files', 'functional_file')]),
+            (getter, wrangle_volumes, [('functional_files', 'functional_file')]),
+            (getter, get_info, [('functional_files', 'functional_file')]),
         ])
 
     if use_rapidart:
