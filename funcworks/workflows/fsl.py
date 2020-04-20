@@ -50,14 +50,17 @@ def fsl_run_level_wf(model,
     getter = pe.Node(
         BIDSGet(
             database_path=database_path,
-            fixed_entities=include_entities),
+            fixed_entities=include_entities,
+            align_volumes=align_volumes),
         name='func_select')
 
     get_info = pe.MapNode(
         GetRunModelInfo(
-            model=step, bids_dir=bids_dir, database_path=database_path,
-            detrend_poly=detrend_poly, align_volumes=align_volumes),
-        iterfield=['functional_file'],
+            model=step,
+            detrend_poly=detrend_poly),
+        iterfield=[
+            'metadata_file', 'regressor_file',
+            'events_file', 'entities'],
         name=f'get_{level}_info')
 
     realign_runs = pe.MapNode(

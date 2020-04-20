@@ -11,9 +11,9 @@ from ..utils import snake_to_camel
 
 
 class _GetRunModelInfoInputSpec(BaseInterfaceInputSpec):
-    metadata_file = InputMultiPath()
-    regressor_file = InputMultiPath()
-    events_file = InputMultiPath()
+    metadata_file = File()
+    regressor_file = File()
+    events_file = File()
     entities = traits.Dict(mandatory=True)
     model = traits.Dict(mandatory=True)
     detrend_poly = traits.Any(
@@ -61,12 +61,11 @@ class GetRunModelInfo(IOBase):
          outputs['contrast_names']) = self._get_contrasts(
              event_names=event_regressors)
         all_regressors = event_regressors + confound_regressors
-        outputs['run_entities'].update({
-            'Volumes': n_timepoints,
-            'DegreesOfFreedom': (n_timepoints - len(all_regressors))})
+        degrees_of_freedom = n_timepoints - len(all_regressors)
         outputs['contrast_entities'] = self._get_entities(
             contrasts=outputs['run_contrasts'],
-            run_entities=outputs['run_entities'])
+            dof=degrees_of_freedom,
+            n_timepoints=n_timepoints)
 
         if self.inputs.detrend_poly:
             polynomial_names, polynomial_arrays = self._detrend_polynomial()
@@ -164,12 +163,14 @@ class GetRunModelInfo(IOBase):
         motion_params = motparams_path
         return motion_params, n_timepoints
 
-    def _get_entities(self, contrasts):
-        run_entities = self.inputs.entities
+    def _get_entities(self, contrasts, dof, n_timepoints):
+        run_entities = self.inputs.entities.copy()
         contrast_entities = []
         contrast_names = [contrast[0] for contrast in contrasts]
         for contrast_name in contrast_names:
-            run_entities.update({'contrast': contrast_name})
+            run_entities['contrast'] = contrast_name
+            run_entities['DegreesOfFreedom'] = dof
+            run_entities['NumTimepoints'] = n_timepoints
             contrast_entities.append(run_entities.copy())
         return contrast_entities
 

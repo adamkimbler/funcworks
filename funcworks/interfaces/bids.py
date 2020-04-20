@@ -159,6 +159,9 @@ class _BIDSGetInputSpec(BaseInterfaceInputSpec):
         exists=True, mandatory=True, desc="Path to BIDS Dataset DBCACHE")
     fixed_entities = traits.Dict(
         desc="Queries for outfield outputs")
+    align_volumes = traits.Either(
+        traits.Int, None, default=None,
+        desc='Run reference to align functional volumes')
 
 
 class _BIDSGetOutputSpec(TraitedSpec):
@@ -183,10 +186,11 @@ class BIDSGet(SimpleInterface):
         from bids import BIDSLayout
         layout = BIDSLayout.load(database_path=self.inputs.database_path)
         fixed_entities = self.inputs.fixed_entities
+
         functional_entities = {
+            **fixed_entities,
             'datatype': 'func', 'desc': 'preproc',
-            'extension': 'nii.gz', 'suffix': 'bold',
-            'subject': fixed_entities['subject']}
+            'extension': 'nii.gz', 'suffix': 'bold'}
         functional_files = layout.get(**functional_entities)
         if len(functional_files) == 0:
             raise FileNotFoundError(
@@ -202,37 +206,45 @@ class BIDSGet(SimpleInterface):
             entities=[])
 
         for file in functional_files:
-            func_ents = layout.parse_file_entities(file)
-            ents = func_ents.copy()
-            data_agg = dict(
-                events_file=layout.get(
-                    **{**ents, 'exentsion': 'tsv', 'suffix': 'events'}),
-                metadata_file=layout.get(**{**ents, 'extension': 'json'}),
-                regressor_file=layout.get(
-                    **{**ents, 'desc': 'confounds', 'suffix': 'regressors'}))
-            # Store old run if it exists and a run to align is specified
-            if 'run' in fixed_entities and 'run' in func_ents:
-                ents['run'] = fixed_entities['run']
-            data_agg['mask_file'] = layout.get(
-                **{**ents.copy(),
-                   'desc': 'brain', 'suffix': 'mask'})
-            data_agg['reference_file'] = layout.get(
-                **{**ents.copy(),
-                   'suffix': 'boldref'})
-            func_ents.pop('suffix', None)
-            func_ents.pop('desc', None)
-            outputs['entities'].append(func_ents)
-            for filetype, files in data_agg.items():
+            ents = layout.parse_file_entities(file.path)
+            if 'space' not in ents:
+                ents['space'] = None
+            file_ents = dict(
+                events={
+                    **ents,
+                    'desc': None, 'extension': 'tsv',
+                    'suffix': 'events', 'space': None},
+                metadata={**ents, 'extension': 'json'},
+                regressor={
+                    **ents, 'desc': 'confounds', 'space': None,
+                    'suffix': 'regressors', 'extension': 'tsv'},
+                mask={**ents, 'desc': 'brain', 'suffix': 'mask'},
+                reference={**ents, 'suffix': 'boldref', 'desc': None})
+            if self.inputs.align_volumes and 'run' not in ents:
+                raise ValueError(
+                    f'Attempted to align to when run entity is not present in '
+                    f'{file.path}.')
+            elif self.inputs.align_volumes:
+                file_ents['mask']['run'] = self.inputs.align_volumes
+                file_ents['reference']['run'] = self.inputs.align_volumes
+
+            ents.pop('suffix', None)
+            ents.pop('desc', None)
+            outputs['entities'].append(ents)
+            for filetype, entities in file_ents.items():
+                files = layout.get(**entities)
                 if len(files) > 1:
                     raise ValueError(
                         f'More than one {filetype} produced for given '
-                        f'entities {func_ents}')
+                        f'entities {entities}\n'
+                        f'{[x.path for x in files]}'
+                        f'{ents}')
                 elif len(files) == 0:
                     raise FileNotFoundError(
                         f'No {filetype} found for given entities '
-                        f'{func_ents}')
+                        f'{entities}')
                 else:
-                    outputs[f'{filetype}s'].append(files[0])
+                    outputs[f'{filetype}_files'].append(files[0])
 
         self._results['functional_files'] = functional_files
         self._results['mask_files'] = outputs['mask_files']
