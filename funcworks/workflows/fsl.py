@@ -5,7 +5,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl
 from nipype.interfaces.utility import Function, IdentityInterface, Merge
 from nipype.algorithms import modelgen, rapidart as ra
-from ..interfaces.bids import BIDSDataGrabber, BIDSDataSink
+from ..interfaces.bids import BIDSGet, BIDSDataSink
 from ..interfaces.modelgen import GetRunModelInfo, GenerateHigherInfo
 from ..interfaces.io import MergeAll, CollateWithMetadata
 from ..interfaces.visualization import PlotMatrices
@@ -45,16 +45,12 @@ def fsl_run_level_wf(model,
     if 'Input' in model:
         if 'Include' in model['Input']:
             include_entities = model['Input']['Include']
+    include_entities.update({'subject': subject_id})
 
     getter = pe.Node(
-        BIDSDataGrabber(
-            subject=subject_id,
+        BIDSGet(
             database_path=database_path,
-            output_query={
-                'bold_files': {
-                    **{'datatype': 'func', 'desc': 'preproc',
-                       'extension': 'nii.gz', 'suffix': 'bold'},
-                    **include_entities}}),
+            fixed_entities=include_entities),
         name='func_select')
 
     get_info = pe.MapNode(
