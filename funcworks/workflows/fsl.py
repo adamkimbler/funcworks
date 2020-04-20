@@ -184,9 +184,7 @@ def fsl_run_level_wf(model,
         name='smooth_susan')
 
     mask_functional = pe.MapNode(
-        fsl.ApplyMask(
-            suffix='_mask',
-            op_string='-mas'),
+        fsl.ApplyMask(),
         iterfield=['in_file', 'mask_file'],
         name='mask_functional')
 
