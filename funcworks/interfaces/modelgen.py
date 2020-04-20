@@ -40,11 +40,9 @@ class _GetRunModelInfoOutputSpec(TraitedSpec):
     repetition_time = traits.Float(desc='Repetition Time for the dataset')
     contrast_names = traits.List(
         desc='List of Contrast Names to pass to higher levels')
-    reference_image = traits.Either(
-        File, traits.Str,
+    reference_image = OutputMultiPath(
         desc='Reference Image for functional realignment')
-    brain_mask = traits.Either(
-        File, traits.Str,
+    brain_mask = OutputMultiPath(
         desc='Brain mask for functional image')
 
 
