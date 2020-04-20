@@ -71,7 +71,7 @@ def get_parser():
             "smoothing on run-level maps before evaluating the dataset level.")
     )
     parser.add_argument(
-        '-w', '--work_dir', action='store', type=Path,
+        '-w', '--work-dir', action='store', type=Path,
         help='Path where intermediate results should be stored.')
     parser.add_argument(
         '--use-rapidart', action='store_true', default=False,

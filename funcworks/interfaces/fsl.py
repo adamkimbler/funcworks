@@ -5,11 +5,15 @@ from nipype.interfaces.base import File
 
 class _ApplyMaskInput(MathsInput):
 
+    in_file = File(
+        position=2, argstr="%s", mandatory=True,
+        desc="Image on which to perform operations")
+
     mask_file = File(
         mandatory=True,
         argstr="-mas %s",
         position=4,
-        desc="binary image defining mask space")
+        desc="Image defining mask spaces")
 
 
 class ApplyMask(MathsCommand):
