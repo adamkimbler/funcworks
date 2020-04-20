@@ -163,8 +163,12 @@ class _BIDSGetInputSpec(BaseInterfaceInputSpec):
 
 class _BIDSGetOutputSpec(TraitedSpec):
     functional_files = OutputMultiPath(File)
-    # mask_files = OutputMultiPath(File)
-    # reference_files = OutputMultiPath(File)
+    mask_files = OutputMultiPath(File)
+    reference_files = OutputMultiPath(File)
+    metadata_files = OutputMultiPath(File)
+    events_files = OutputMultiPath(File)
+    regressor_files = OutputMultiPath(File)
+    entities = OutputMultiPath(traits.Dict)
 
 
 class BIDSGet(SimpleInterface):
@@ -188,6 +192,54 @@ class BIDSGet(SimpleInterface):
             raise FileNotFoundError(
                 f'Unable to find functional image with '
                 f'specified entities {functional_entities}')
+
+        outputs = dict(
+            mask_files=[],
+            reference_files=[],
+            events_files=[],
+            metadata_files=[],
+            regressor_files=[],
+            entities=[])
+
+        for file in functional_files:
+            func_ents = layout.parse_file_entities(file)
+            ents = func_ents.copy()
+            data_agg = dict(
+                events_file=layout.get(
+                    **{**ents, 'exentsion': 'tsv', 'suffix': 'events'}),
+                metadata_file=layout.get(**{**ents, 'extension': 'json'}),
+                regressor_file=layout.get(
+                    **{**ents, 'desc': 'confounds', 'suffix': 'regressors'}))
+            # Store old run if it exists and a run to align is specified
+            if 'run' in fixed_entities and 'run' in func_ents:
+                ents['run'] = fixed_entities['run']
+            data_agg['mask_file'] = layout.get(
+                **{**ents.copy(),
+                   'desc': 'brain', 'suffix': 'mask'})
+            data_agg['reference_file'] = layout.get(
+                **{**ents.copy(),
+                   'suffix': 'boldref'})
+            func_ents.pop('suffix', None)
+            func_ents.pop('desc', None)
+            outputs['entities'].append(func_ents)
+            for filetype, files in data_agg.items():
+                if len(files) > 1:
+                    raise ValueError(
+                        f'More than one {filetype} produced for given '
+                        f'entities {func_ents}')
+                elif len(files) == 0:
+                    raise FileNotFoundError(
+                        f'No {filetype} found for given entities '
+                        f'{func_ents}')
+                else:
+                    outputs[f'{filetype}s'].append(files[0])
+
         self._results['functional_files'] = functional_files
+        self._results['mask_files'] = outputs['mask_files']
+        self._results['reference_files'] = outputs['reference_files']
+        self._results['metadata_files'] = outputs['metadata_files']
+        self._results['events_files'] = outputs['events_files']
+        self._results['regressor_files'] = outputs['regressor_files']
+        self._results['entities'] = outputs['entities']
 
         return runtime

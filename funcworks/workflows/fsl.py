@@ -241,25 +241,31 @@ def fsl_run_level_wf(model,
         name=f'wrangle_{level}_outputs')
 
     # Setup connections among nodes
+    workflow.connect([
+        (getter, get_info, [
+            ('metadata_files', 'metadata_file'),
+            ('events_files', 'events_file'),
+            ('regressor_files', 'regressor_file'),
+            ('entities', 'entities')])
+    ])
     if align_volumes:
         workflow.connect([
-            (getter, realign_runs, [('functional_files', 'in_file')]),
-            (getter, get_info, [('functional_files', 'functional_file')]),
-            (get_info, realign_runs, [('reference_image', 'ref_file')]),
+            (getter, realign_runs, [
+                ('functional_files', 'in_file'),
+                ('reference_files', 'ref_file')]),
             (realign_runs, wrangle_volumes, [('out_file', 'functional_file')])
         ])
     else:
         workflow.connect([
             (getter, wrangle_volumes, [
                 ('functional_files', 'functional_file')]),
-            (getter, get_info, [('functional_files', 'functional_file')]),
         ])
 
     if use_rapidart:
         workflow.connect([
             (get_info, run_rapidart, [
                 ('motion_parameters', 'realignment_parameters')]),
-            (get_info, run_rapidart, [('brain_mask', 'mask_file')]),
+            (getter, run_rapidart, [('mask_files', 'mask_file')]),
             (wrangle_volumes, run_rapidart, [
                 ('functional_file', 'realigned_files')]),
             (run_rapidart, reshape_rapidart, [
@@ -289,15 +295,15 @@ def fsl_run_level_wf(model,
         workflow.connect([
             (wrangle_volumes, mean_img, [('functional_file', 'in_file')]),
             (wrangle_volumes, median_img, [('functional_file', 'in_file')]),
-            (get_info, mean_img, [('brain_mask', 'mask_file')]),
-            (get_info, median_img, [('brain_mask', 'mask_file')]),
+            (getter, mean_img, [('mask_files', 'mask_file')]),
+            (getter, median_img, [('mask_files', 'mask_file')]),
             (mean_img, merge, [('out_file', 'in1')]),
             (median_img, merge, [('out_stat', 'in2')]),
             (wrangle_volumes, run_susan, [('functional_file', 'in_file')]),
             (median_img, run_susan, [
                 (('out_stat', utils.get_btthresh), 'brightness_threshold')]),
             (merge, run_susan, [(('out', utils.get_usans), 'usans')]),
-            (get_info, mask_functional, [('brain_mask', 'in_file2')]),
+            (getter, mask_functional, [('mask_files', 'in_file2')]),
             (run_susan, mask_functional, [('smoothed_file', 'in_file')]),
             (mask_functional, specify_model,
                 [('out_file', 'functional_runs')]),
@@ -305,7 +311,7 @@ def fsl_run_level_wf(model,
         ])
     else:
         workflow.connect([
-            (get_info, mask_functional, [('brain_mask', 'in_file2')]),
+            (getter, mask_functional, [('mask_files', 'in_file2')]),
             (wrangle_volumes, mask_functional, [
                 ('functional_file', 'in_file')]),
             (mask_functional, specify_model, [
@@ -343,7 +349,7 @@ def fsl_run_level_wf(model,
         ])
 
     workflow.connect([
-        (get_info, plot_matrices, [('run_entities', 'entities')]),
+        (getter, plot_matrices, [('entities', 'entities')]),
         (generate_model, plot_matrices, [('con_file', 'con_file')]),
         (fit_model, estimate_model, [('functional_data', 'in_file')]),
         (generate_model, estimate_model, [('con_file', 'tcon_file')]),
