@@ -11,9 +11,9 @@ from ..utils import snake_to_camel
 
 
 class _GetRunModelInfoInputSpec(BaseInterfaceInputSpec):
-    metadata_file = File()
-    regressor_file = File()
-    events_file = File()
+    metadata_file = File(exists=True, mandatory=True)
+    regressor_file = File(exists=True, mandatory=True)
+    events_file = File(exists=True, mandatory=True)
     entities = traits.Dict(mandatory=True)
     model = traits.Dict(mandatory=True)
     detrend_poly = traits.Any(

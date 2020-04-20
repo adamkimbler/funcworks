@@ -165,12 +165,12 @@ class _BIDSGetInputSpec(BaseInterfaceInputSpec):
 
 
 class _BIDSGetOutputSpec(TraitedSpec):
-    functional_files = OutputMultiPath(File)
-    mask_files = OutputMultiPath(File)
-    reference_files = OutputMultiPath(File)
-    metadata_files = OutputMultiPath(File)
-    events_files = OutputMultiPath(File)
-    regressor_files = OutputMultiPath(File)
+    functional_files = OutputMultiPath(File(exists=True))
+    mask_files = OutputMultiPath(File(exists=True))
+    reference_files = OutputMultiPath(File(exists=True))
+    metadata_files = OutputMultiPath(File(exists=True))
+    events_files = OutputMultiPath(File(exists=True))
+    regressor_files = OutputMultiPath(File(exists=True))
     entities = OutputMultiPath(traits.Dict)
 
 
