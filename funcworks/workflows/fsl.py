@@ -184,10 +184,10 @@ def fsl_run_level_wf(model,
         name='smooth_susan')
 
     mask_functional = pe.MapNode(
-        fsl.ImageMaths(
+        fsl.ApplyMask(
             suffix='_mask',
             op_string='-mas'),
-        iterfield=['in_file', 'in_file2'],
+        iterfield=['in_file', 'mask_file'],
         name='mask_functional')
 
     # Exists solely to correct undesirable behavior of FSL
@@ -306,7 +306,7 @@ def fsl_run_level_wf(model,
             (median_img, run_susan, [
                 (('out_stat', utils.get_btthresh), 'brightness_threshold')]),
             (merge, run_susan, [(('out', utils.get_usans), 'usans')]),
-            (getter, mask_functional, [('mask_files', 'in_file2')]),
+            (getter, mask_functional, [('mask_files', 'mask_file')]),
             (run_susan, mask_functional, [('smoothed_file', 'in_file')]),
             (mask_functional, specify_model,
                 [('out_file', 'functional_runs')]),
@@ -314,7 +314,7 @@ def fsl_run_level_wf(model,
         ])
     else:
         workflow.connect([
-            (getter, mask_functional, [('mask_files', 'in_file2')]),
+            (getter, mask_functional, [('mask_files', 'mask_file')]),
             (wrangle_volumes, mask_functional, [
                 ('functional_file', 'in_file')]),
             (mask_functional, specify_model, [
