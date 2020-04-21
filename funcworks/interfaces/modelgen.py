@@ -383,7 +383,7 @@ class GenerateHigherInfo(IOBase):
                     {**ents, 'desc': matrix_type},
                     path_patterns=matrix_patt, validate=False)
                 matrix_path = Path.cwd() / matrix_path
-                if matrix_path.is_file:  # Remove file if it exists
+                if matrix_path.is_file():  # Remove file if it exists
                     matrix_path.unlink()
                 matrix_path = str(matrix_path.as_posix())
                 mat_file = open(matrix_path, 'a')
