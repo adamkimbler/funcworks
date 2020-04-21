@@ -129,7 +129,7 @@ class GetRunModelInfo(IOBase):
             contrast_names.append(dcontrast)
 
         for contrast in real_contrasts:
-            if not set(event_names).issubset(contrast['ConditionList']):
+            if not set(contrast['ConditionList']).issubset(set(event_names)):
                 continue
             contrast_names.append(contrast['Name'])
             if contrast['Name'] == 'task_vs_baseline':
