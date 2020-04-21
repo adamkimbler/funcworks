@@ -276,7 +276,6 @@ class GenerateHigherInfo(IOBase):
             organization[org_key]['Metadata']['NumLevelTimepoints'] = len(
                 organization[org_key]['Files'])
             organization[org_key]['Metadata'].pop('stat', None)
-            organization[org_key]['Metadata'].pop('run', None)
 
         return organization
 
@@ -320,6 +319,7 @@ class GenerateHigherInfo(IOBase):
 
                 if metadata['space'] is None:
                     metadata.pop('space', None)
+                    metadata.pop('run', None)
                 metadata.pop('stat', None)
                 maps_info['map_entities'].append(metadata.copy())
                 metadata['contrast'] = snake_to_camel(metadata['contrast'])

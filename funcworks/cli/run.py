@@ -97,7 +97,7 @@ def get_parser():
         '-sa', '--smooth-autocorrelations', action='store_true',
         default=False,
         help='Option to enable smoothing of autocorrelations '
-             'during run level analyses (default: False).'
+             'during run level analyses.'
     )
     parser.add_argument(
         '--version',
