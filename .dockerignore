@@ -4,6 +4,8 @@ data
 *.rst
 *.md
 *.egg-info/
+.git
+.gitignore
 .circleci/
 docs/
 examples/
