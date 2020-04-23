@@ -26,7 +26,7 @@ jobs:
 
   build:
     docker:
-      - image: docker:stable-git
+      - image: docker:18.01.0-ce-git
     working_directory: /tmp/src/funcworks
     steps:
       - run:
@@ -124,7 +124,7 @@ jobs:
 
   test_ds003:
       machine:
-          image: ubuntu-1604:201903-01
+          image: circleci/classic:201711-01
       working_directory: /tmp/src/funcworks
       steps:
         - attach_workspace:
@@ -160,7 +160,7 @@ jobs:
             command: |
               mkdir -p /tmp/ds003/work /tmp/ds003/derivatives
               chmod 777 /tmp/ds003/work /tmp/ds003/derivatives
-              export CONDA_PREFIX=/opt/conda/envs/neuro
+              export CONDA_PREFIX=/opt/miniconda-latest/envs/neuro
               docker run --rm -v /tmp/data/ds003_fmriprep:/data: \
                   -v /tmp/ds003/derivatives:/out \
                   -v /tmp/ds003/work:/scratch \
@@ -226,6 +226,9 @@ workflows:
           requires:
             - build
             - cache_test_data
+          filters:
+            tags:
+              only: /.*/
   style_check:
     jobs:
       - style_check
