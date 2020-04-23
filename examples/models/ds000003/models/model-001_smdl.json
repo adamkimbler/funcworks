@@ -54,6 +54,11 @@
           "Type": "t"
         }
       ]
+    },
+    {
+      "Level": "subject",
+      "DummyContrasts": {
+      "Type": "t"
     }
   ]
 }
