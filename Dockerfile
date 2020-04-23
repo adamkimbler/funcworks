@@ -50,8 +50,7 @@ ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 10.16.3
 
 # install nvm
-# https://github.com/creationix/nvm#install-script
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+RUN curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 
 # install node and npm
 RUN source $NVM_DIR/nvm.sh \
