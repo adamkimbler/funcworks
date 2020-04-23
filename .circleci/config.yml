@@ -206,6 +206,9 @@ workflows:
           requires:
             - build
             - cache_test_data
+          filters:
+            tags:
+              only: /.*/
   style_check:
     jobs:
       - style_check
