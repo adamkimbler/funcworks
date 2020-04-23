@@ -9,7 +9,7 @@ jobs:
     working_directory: /tmp/src/style_check
     docker:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      - image: docker:18.01.0-ce-git
+      - image: continuumio/miniconda3
     steps:
       - checkout
       - run:
@@ -26,7 +26,7 @@ jobs:
 
   build:
     docker:
-      - image: docker:stable-git
+      - image: docker:18.01.0-ce-git
     working_directory: /tmp/src/funcworks
     steps:
       - run:
