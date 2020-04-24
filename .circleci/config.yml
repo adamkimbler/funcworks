@@ -214,7 +214,7 @@ jobs:
                   --rcfile /tmp/src/funcworks/docker/multiproc.coveragerc \
                   /tmp/ds003/work/.coverage.* \
                   /tmp/ds003/work_sdlx/.coverage.* \
-                  /tmp/ds003/work_modules/.coverage.*
+                  /tmp/ds003/work_modules/.coverage*
                 sed -i -e 's/.opt.miniconda-latest.envs.neuro.lib.python3.6.site-packages/\/tmp\/src\/funcworks/g' .coverage
                 python -m coverage xml
                 python -m codecov --file coverage.xml --flags ds003 -e CIRCLE_JOB
