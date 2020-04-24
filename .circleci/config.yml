@@ -166,6 +166,7 @@ jobs:
                   --entrypoint="/neurodocker/startup.sh" \
                   adamkimbler/funcworks:latest \
                   pytest --cov=funcworks \
+                  --cov-config=/src/funcworks/docker/multiproc.coveragerc \
                   $CONDA_PREFIX/lib/python3.6/site-packages/funcworks/tests/
         - run:
             name: Run Funcworks
