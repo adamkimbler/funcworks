@@ -165,7 +165,7 @@ jobs:
                   -e COVERAGE_FILE=/scratch/.coverage \
                   --entrypoint="/neurodocker/startup.sh" \
                   adamkimbler/funcworks:latest \
-                  pytest --cov=funcworks \
+                  pytest --cov=$CONDA_PREFIX/lib/python3.6/site-packages/funcworks/ \
                   --cov-config=/src/funcworks/docker/multiproc.coveragerc \
                   $CONDA_PREFIX/lib/python3.6/site-packages/funcworks/tests/
         - run:
