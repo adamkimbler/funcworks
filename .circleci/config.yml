@@ -159,7 +159,7 @@ jobs:
             no_output_timeout: 2h
             command: |
               mkdir -p /tmp/ds003/work_modules
-              chmod 777 /tmp/ds003/work_utils
+              chmod 777 /tmp/ds003/work_modules
               export CONDA_PREFIX=/opt/miniconda-latest/envs/neuro
               docker run --rm -v /tmp/ds003/work_modules:/scratch \
                   -e COVERAGE_FILE=/scratch/.coverage \
