@@ -1,6 +1,7 @@
 """Tests for utils."""
 import numpy as np
 from funcworks import utils
+from pathlib import Path
 
 
 def test__get_btthresh():
@@ -30,8 +31,6 @@ def test__reshape_ra():
     """Test reshape_ra."""
     from nipype.interfaces.base import Bunch
     import nibabel as nb
-    from pathlib import Path
-    import numpy as np
 
     run_info = Bunch(**{'regressors': [], 'regressor_names': []})
     outlier_file = Path.cwd() / 'outlier_test.txt'
@@ -47,3 +46,20 @@ def test__reshape_ra():
     assert len(output_run_info.regressors) == 6
     for col in output_run_info.regressors:
         assert np.sum(col) == 1
+
+
+def test__flatten():
+    """Test flatten."""
+    input = [[1], [2], [3]]
+    expected = [1, 2, 3]
+    output = utils.flatten(input)
+    assert output == expected
+
+
+def test__correct_matrices():
+    """Test correct_matrices."""
+    import filecmp
+    curr_dir = Path(__file__).parent
+    matrix_file = curr_dir / 'data' / 'run0.mat'
+    output = utils.correct_matrix(matrix_file)
+    assert filecmp.cmp(output, curr_dir / 'data' / 'run0_corrected.mat')
