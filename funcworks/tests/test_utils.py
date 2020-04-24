@@ -20,7 +20,7 @@ def test__get_usans():
 
 def test__snake_to_camel():
     """Test snake_to_camel."""
-    expected = 'trialType.negLureFa'
+    expected = 'trialTypenegLureFa'
     input = 'trial_type.neg_lure_fa'
     output = utils.snake_to_camel(input)
     assert output == expected
@@ -33,16 +33,17 @@ def test__reshape_ra():
     from pathlib import Path
     import numpy as np
 
-    run_info = Bunch(**{'Regressors': []})
+    run_info = Bunch(**{'regressors': [], 'regressor_names': []})
     outlier_file = Path.cwd() / 'outlier_test.txt'
-    np.savetxt(outlier_file, np.array([0], [1], [36], [54], [60], [75]))
-    test_img = nb.nifti1.Nifti1Image(np.ones(90, 90, 90), np.eye(4))
-    test_img.save(Path.cwd() / 'test.nii.gz')
-    contrast_entities = {'DegreesOfFreedom': 9}
+    np.savetxt(outlier_file, np.array([[0], [1], [36], [54], [60], [75]]))
+    test_img = nb.nifti1.Nifti1Image(np.ones((90, 90, 90, 90)), np.eye(4))
+    nb.save(test_img, Path.cwd() / 'test.nii.gz')
+    contrast_entities = [{'DegreesOfFreedom': 9}]
     (output_run_info,
      output_contrast_entities) = utils.reshape_ra(
-         run_info, test_img, outlier_file, contrast_entities)
-    assert output_contrast_entities['DegreesOfFreedom'] == 3
+         run_info, Path.cwd() / 'test.nii.gz', outlier_file, contrast_entities)
+    for contrast_ents in output_contrast_entities:
+        assert contrast_ents['DegreesOfFreedom'] == 3
     assert len(output_run_info.regressors) == 6
     for col in output_run_info.regressors:
         assert np.sum(col) == 1

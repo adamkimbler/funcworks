@@ -155,19 +155,18 @@ jobs:
                 docker images
               fi
         - run:
-            name: Run Utils tests
+            name: Run Module Tests
             no_output_timeout: 2h
             command: |
-              mkdir -p /tmp/ds003/work_utils
+              mkdir -p /tmp/ds003/work_modules
               chmod 777 /tmp/ds003/work_utils
               export CONDA_PREFIX=/opt/miniconda-latest/envs/neuro
-              docker run --rm -v /tmp/ds003/work_utils:/scratch \
+              docker run --rm -v /tmp/ds003/work_modules:/scratch \
                   -e COVERAGE_FILE=/scratch/.coverage \
                   --entrypoint="/neurodocker/startup.sh" \
                   adamkimbler/funcworks:latest \
-                  coverage run \
-                  --rcfile /src/funcworks/docker/multiproc.coveragerc \
-                  $CONDA_PREFIX/lib/python3.6/site-packages/funcworks/tests/test_utils.py
+                  pytest --cov=funcworks \
+                  $CONDA_PREFIX/lib/python3.6/site-packages/funcworks/tests/
         - run:
             name: Run Funcworks
             no_output_timeout: 2h
@@ -214,7 +213,7 @@ jobs:
                   --rcfile /tmp/src/funcworks/docker/multiproc.coveragerc \
                   /tmp/ds003/work/.coverage.* \
                   /tmp/ds003/work_sdlx/.coverage.* \
-                  /tmp/ds003/work_utils/.coverage.*
+                  /tmp/ds003/work_modules/*/.coverage.*
                 sed -i -e 's/.opt.miniconda-latest.envs.neuro.lib.python3.6.site-packages/\/tmp\/src\/funcworks/g' .coverage
                 python -m coverage xml
                 python -m codecov --file coverage.xml --flags ds003 -e CIRCLE_JOB
