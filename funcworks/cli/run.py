@@ -98,8 +98,10 @@ def get_parser():
         '-sa', '--smooth-autocorrelations', action='store_true',
         default=False,
         help='Option to enable smoothing of autocorrelations '
-             'during run level analyses.'
-    )
+             'during run level analyses.')
+    parser.add_argument(
+        '--despike', default=False, action='store_true',
+        help='Run afni despike on the data')
     parser.add_argument(
         '--version',
         action='version',
@@ -345,7 +347,8 @@ def build_workflow(opts, retval):
         use_rapidart=opts.use_rapidart,
         detrend_poly=opts.detrend_poly,
         align_volumes=opts.align_volumes,
-        smooth_autocorrelations=opts.smooth_autocorrelations)
+        smooth_autocorrelations=opts.smooth_autocorrelations,
+        despike=opts.despike)
 
     retval['return_code'] = 0
     # logs_path = Path(output_dir) / 'funcworks' / 'logs'
