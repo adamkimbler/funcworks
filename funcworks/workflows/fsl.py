@@ -67,7 +67,7 @@ def fsl_run_level_wf(model,
         name=f'get_{level}_info')
 
     despiker = pe.MapNode(
-        afni.Despike(output_type='nii.gz'),
+        afni.Despike(outputtype='NIFTI_GZ'),
         iterfield=['in_file'],
         name='despiker')
 
