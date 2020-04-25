@@ -81,8 +81,7 @@ def fsl_run_level_wf(model,
     wrangle_volumes = pe.MapNode(
         IdentityInterface(fields=['functional_file']),
         iterfield=['functional_file'],
-        name='wrangle_volumes'
-    )
+        name='wrangle_volumes')
 
     specify_model = pe.MapNode(
         modelgen.SpecifyModel(
