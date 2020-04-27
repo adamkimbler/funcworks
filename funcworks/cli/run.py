@@ -114,7 +114,7 @@ def get_parser():
     g_perf = parser.add_argument_group('Options to impact performance')
     g_perf.add_argument(
         '--use-plugin', action='store', default=None,
-        help='File containing plugin configuration for NiPype.')
+        help='File containing plugin configuration for Nipype.')
     g_perf.add_argument(
         '--resource-monitor', dest='resource_monitor', action='store_true',
         help='Use Nipype resource monitoring.')
@@ -150,7 +150,6 @@ def main():
         p.join()
 
         retcode = p.exitcode or retval.get('return_code', 0)
-        #
         # bids_dir = retval.get('bids_dir')
         # output_dir = retval.get('output_dir')
         # work_dir = retval.get('work_dir')
