@@ -316,7 +316,7 @@ def build_workflow(opts, retval):
             'summary_append': True,
         }
     })
-    #
+
     if opts.resource_monitor:
         ncfg.enable_resource_monitor()
     # Called with reports only
