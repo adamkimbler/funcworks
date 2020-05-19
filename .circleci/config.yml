@@ -108,8 +108,8 @@ jobs:
           command: |
             datalad install -r ///labs/poldrack/ds003_fmriprep
             datalad update ds003_fmriprep/
-            datalad get ds003_fmriprep/sub-0{1,2,3}/func/*_space-*_desc-*.nii.gz \
-                        ds003_fmriprep/sub-0{1,2,3}/func/*_desc-confounds_*.tsv \
+            datalad get ds003_fmriprep/sub-0{1,2}/func/*_space-*_desc-*.nii.gz \
+                        ds003_fmriprep/sub-0{1,2}/func/*_desc-confounds_*.tsv \
                         ds003_fmriprep/dataset_description.json \
                         ds003_fmriprep/sub-*/*/*.json
       - run:
@@ -186,7 +186,7 @@ jobs:
                   --rcfile /src/funcworks/docker/multiproc.coveragerc \
                   $CONDA_PREFIX/bin/funcworks /data/sourcedata /out dataset \
                   -d /data -m /models/model-001_smdl.json -w /scratch \
-                  --participant-label 01 02 03 \
+                  --participant-label 01 02 \
                   --resource-monitor
         - run:
             name: Run Funcworks - Super Deluxe
@@ -206,7 +206,7 @@ jobs:
                   --rcfile /src/funcworks/docker/multiproc.coveragerc \
                   $CONDA_PREFIX/bin/funcworks /data/sourcedata /out dataset \
                   -d /data -m /models/model-001_smdl.json -w /scratch \
-                  --participant-label 01 02 03 \
+                  --participant-label 01 02 \
                   --smoothing 4 --smooth-autocorrelations \
                   --use-rapidart --detrend-poly 3 \
                   --despike \
