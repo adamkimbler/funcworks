@@ -111,7 +111,7 @@ jobs:
             datalad get ds003_fmriprep/sub-0{1,2,3}/func/*_space-*_desc-*.nii.gz \
                         ds003_fmriprep/sub-0{1,2,3}/func/*_desc-confounds_*.tsv \
                         ds003_fmriprep/dataset_description.json \
-                        ds003_fmriprep/sub-0{1,2,3}/*/*.json
+                        ds003_fmriprep/sub-0{1,2,3}/func/*.json
       - run:
           name: Download a model for ds000003
           command: |
