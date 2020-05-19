@@ -9,7 +9,7 @@ jobs:
     working_directory: /tmp/src/funcworks
     docker:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      - image: continuumio/miniconda3
+      - image: continuumio/miniconda3:latest
     steps:
       - checkout
       - run:
