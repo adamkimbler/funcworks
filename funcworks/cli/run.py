@@ -229,8 +229,7 @@ def build_workflow(opts, retval):
             derivatives=opts.derivatives,
             validate=True,
             database_file=database_path,
-            reset_database=True,
-            force_index=True)
+            reset_database=True)
     else:
         database_path = opts.database_path
         layout = BIDSLayout.load(database_path)
