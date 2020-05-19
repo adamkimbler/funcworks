@@ -225,9 +225,9 @@ def build_workflow(opts, retval):
     if not opts.database_path:
         database_path = str(opts.work_dir.resolve() / 'dbcache')
         layout = BIDSLayout(
-            bids_dir, derivatives=opts.derivatives, validate=True,
-            database_file=database_path,
-            reset_database=True)
+            bids_dir, validate=True)
+        layout.add_derivatives(opts.derivatives)
+        layout.save(database_path)
     else:
         database_path = opts.database_path
         layout = BIDSLayout.load(database_path)
