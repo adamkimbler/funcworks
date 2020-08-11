@@ -22,7 +22,7 @@ jobs:
           name: Style check
           command: |
             source activate venv
-            flake8 --max-line-length=99 --exclude build/,tests/,**/__init__.py,**/versioneer.py  --ignore=E126,E402,W503,E203 /tmp/src/funcworks
+            flake8 --max-line-length=99 --exclude build/,tests/,**/__init__.py,**/versioneer.py  --ignore=E126,E402,W503,E203,BLK100 /tmp/src/funcworks
 
   build:
     docker:
