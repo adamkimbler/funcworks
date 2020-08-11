@@ -30,7 +30,7 @@ def fsl_run_level_wf(
     align_volumes=None,
     smooth_autocorrelations=False,
     despike=False,
-    name="fsl_run_level_wf",
+    name="fsl_run_level_wf"
 ):
     """Generate run level workflow for a given model."""
     bids_dir = Path(bids_dir)
@@ -63,19 +63,12 @@ def fsl_run_level_wf(
 
     get_info = pe.MapNode(
         GetRunModelInfo(model=step, detrend_poly=detrend_poly),
-        iterfield=[
-            "metadata_file",
-            "regressor_file",
-            "events_file",
-            "entities",
-        ],
+        iterfield=["metadata_file", "regressor_file", "events_file", "entities"],
         name=f"get_{level}_info",
     )
 
     despiker = pe.MapNode(
-        afni.Despike(outputtype="NIFTI_GZ"),
-        iterfield=["in_file"],
-        name="despiker",
+        afni.Despike(outputtype="NIFTI_GZ"), iterfield=["in_file"], name="despiker",
     )
 
     realign_runs = pe.MapNode(
@@ -91,37 +84,22 @@ def fsl_run_level_wf(
     )
 
     specify_model = pe.MapNode(
-        modelgen.SpecifyModel(
-            high_pass_filter_cutoff=-1.0, input_units="secs"
-        ),
+        modelgen.SpecifyModel(high_pass_filter_cutoff=-1.0, input_units="secs"),
         iterfield=["functional_runs", "subject_info", "time_repetition"],
         name=f"model_{level}_specify",
     )
 
     fit_model = pe.MapNode(
         IdentityInterface(
-            fields=[
-                "session_info",
-                "interscan_interval",
-                "contrasts",
-                "functional_data",
-            ],
+            fields=["session_info", "interscan_interval", "contrasts", "functional_data"],
             mandatory_inputs=True,
         ),
-        iterfield=[
-            "functional_data",
-            "session_info",
-            "interscan_interval",
-            "contrasts",
-        ],
+        iterfield=["functional_data", "session_info", "interscan_interval", "contrasts"],
         name=f"model_{level}_fit",
     )
 
     first_level_design = pe.MapNode(
-        fsl.Level1Design(
-            bases={"dgamma": {"derivs": False}},
-            model_serial_correlations=False,
-        ),
+        fsl.Level1Design(bases={"dgamma": {"derivs": False}}, model_serial_correlations=False,),
         iterfield=["session_info", "interscan_interval", "contrasts"],
         name=f"model_{level}_design",
     )
@@ -150,9 +128,7 @@ def fsl_run_level_wf(
         estimate_model.inputs.autocorr_noestimate = False
 
     calculate_p = pe.MapNode(
-        fsl.ImageMaths(
-            output_type="NIFTI_GZ", op_string="-ztop", suffix="_pval"
-        ),
+        fsl.ImageMaths(output_type="NIFTI_GZ", op_string="-ztop", suffix="_pval"),
         iterfield=["in_file"],
         name=f"model_{level}_caculate_p",
     )
@@ -182,28 +158,16 @@ def fsl_run_level_wf(
 
     reshape_rapidart = pe.MapNode(
         Function(
-            input_names=[
-                "run_info",
-                "functional_file",
-                "outlier_file",
-                "contrast_entities",
-            ],
+            input_names=["run_info", "functional_file", "outlier_file", "contrast_entities"],
             output_names=["run_info", "contrast_entities"],
             function=utils.reshape_ra,
         ),
-        iterfield=[
-            "run_info",
-            "functional_file",
-            "outlier_file",
-            "contrast_entities",
-        ],
+        iterfield=["run_info", "functional_file", "outlier_file", "contrast_entities"],
         name="reshape_rapidart",
     )
 
     mean_img = pe.MapNode(
-        fsl.ImageMaths(
-            output_type="NIFTI_GZ", op_string="-Tmean", suffix="_mean"
-        ),
+        fsl.ImageMaths(output_type="NIFTI_GZ", op_string="-Tmean", suffix="_mean"),
         iterfield=["in_file", "mask_file"],
         name="smooth_susan_avgimg",
     )
@@ -256,13 +220,7 @@ def fsl_run_level_wf(
 
     collate_outputs = pe.Node(
         CollateWithMetadata(
-            fields=[
-                "effect_maps",
-                "variance_maps",
-                "zscore_maps",
-                "pvalue_maps",
-                "tstat_maps",
-            ],
+            fields=["effect_maps", "variance_maps", "zscore_maps", "pvalue_maps", "tstat_maps"],
             field_to_metadata_map={
                 "effect_maps": {"stat": "effect"},
                 "variance_maps": {"stat": "variance"},
@@ -315,11 +273,7 @@ def fsl_run_level_wf(
                 (getter, despiker, [("functional_files", "in_file")]),
                 (despiker, realign_runs, [("out_file", "in_file")]),
                 (getter, realign_runs, [("reference_files", "ref_file")]),
-                (
-                    realign_runs,
-                    wrangle_volumes,
-                    [("out_file", "functional_file")],
-                ),
+                (realign_runs, wrangle_volumes, [("out_file", "functional_file")],),
             ]
         )
     elif align_volumes and not despike:
@@ -328,16 +282,9 @@ def fsl_run_level_wf(
                 (
                     getter,
                     realign_runs,
-                    [
-                        ("functional_files", "in_file"),
-                        ("reference_files", "ref_file"),
-                    ],
+                    [("functional_files", "in_file"), ("reference_files", "ref_file")],
                 ),
-                (
-                    realign_runs,
-                    wrangle_volumes,
-                    [("out_file", "functional_file")],
-                ),
+                (realign_runs, wrangle_volumes, [("out_file", "functional_file")],),
             ]
         )
     elif despike:
@@ -348,59 +295,24 @@ def fsl_run_level_wf(
             ]
         )
     else:
-        workflow.connect(
-            [
-                (
-                    getter,
-                    wrangle_volumes,
-                    [("functional_files", "functional_file")],
-                ),
-            ]
-        )
+        workflow.connect([(getter, wrangle_volumes, [("functional_files", "functional_file")])])
 
     if use_rapidart:
         workflow.connect(
             [
-                (
-                    get_info,
-                    run_rapidart,
-                    [("motion_parameters", "realignment_parameters")],
-                ),
+                (get_info, run_rapidart, [("motion_parameters", "realignment_parameters")]),
                 (getter, run_rapidart, [("mask_files", "mask_file")]),
-                (
-                    wrangle_volumes,
-                    run_rapidart,
-                    [("functional_file", "realigned_files")],
-                ),
-                (
-                    run_rapidart,
-                    reshape_rapidart,
-                    [("outlier_files", "outlier_file")],
-                ),
+                (wrangle_volumes, run_rapidart, [("functional_file", "realigned_files")],),
+                (run_rapidart, reshape_rapidart, [("outlier_files", "outlier_file")],),
                 (
                     get_info,
                     reshape_rapidart,
-                    [
-                        ("run_info", "run_info"),
-                        ("contrast_entities", "contrast_entities"),
-                    ],
+                    [("run_info", "run_info"), ("contrast_entities", "contrast_entities")],
                 ),
-                (
-                    wrangle_volumes,
-                    reshape_rapidart,
-                    [("functional_file", "functional_file")],
-                ),
-                (
-                    reshape_rapidart,
-                    specify_model,
-                    [("run_info", "subject_info")],
-                ),
+                (wrangle_volumes, reshape_rapidart, [("functional_file", "functional_file")]),
+                (reshape_rapidart, specify_model, [("run_info", "subject_info")],),
                 (reshape_rapidart, plot_matrices, [("run_info", "run_info")]),
-                (
-                    reshape_rapidart,
-                    collate,
-                    [("contrast_entities", "contrast_metadata")],
-                ),
+                (reshape_rapidart, collate, [("contrast_entities", "contrast_metadata")]),
             ]
         )
     else:
@@ -408,11 +320,7 @@ def fsl_run_level_wf(
             [
                 (get_info, specify_model, [("run_info", "subject_info")]),
                 (get_info, plot_matrices, [("run_info", "run_info")]),
-                (
-                    get_info,
-                    collate,
-                    [("contrast_entities", "contrast_metadata")],
-                ),
+                (get_info, collate, [("contrast_entities", "contrast_metadata")],),
             ]
         )
 
@@ -423,11 +331,7 @@ def fsl_run_level_wf(
         workflow.connect(
             [
                 (wrangle_volumes, mean_img, [("functional_file", "in_file")]),
-                (
-                    wrangle_volumes,
-                    median_img,
-                    [("functional_file", "in_file")],
-                ),
+                (wrangle_volumes, median_img, [("functional_file", "in_file")],),
                 (getter, mean_img, [("mask_files", "mask_file")]),
                 (getter, median_img, [("mask_files", "mask_file")]),
                 (mean_img, merge, [("out_file", "in1")]),
@@ -436,26 +340,13 @@ def fsl_run_level_wf(
                 (
                     median_img,
                     run_susan,
-                    [
-                        (
-                            ("out_stat", utils.get_btthresh),
-                            "brightness_threshold",
-                        )
-                    ],
+                    [(("out_stat", utils.get_btthresh), "brightness_threshold",)],
                 ),
                 (merge, run_susan, [(("out", utils.get_usans), "usans")]),
                 (getter, mask_functional, [("mask_files", "mask_file")]),
                 (run_susan, mask_functional, [("smoothed_file", "in_file")]),
-                (
-                    mask_functional,
-                    specify_model,
-                    [("out_file", "functional_runs")],
-                ),
-                (
-                    mask_functional,
-                    fit_model,
-                    [("out_file", "functional_data")],
-                ),
+                (mask_functional, specify_model, [("out_file", "functional_runs")],),
+                (mask_functional, fit_model, [("out_file", "functional_data")],),
             ]
         )
 
@@ -463,39 +354,20 @@ def fsl_run_level_wf(
         workflow.connect(
             [
                 (getter, mask_functional, [("mask_files", "mask_file")]),
-                (
-                    wrangle_volumes,
-                    mask_functional,
-                    [("functional_file", "in_file")],
-                ),
-                (
-                    mask_functional,
-                    specify_model,
-                    [("out_file", "functional_runs")],
-                ),
-                (
-                    mask_functional,
-                    fit_model,
-                    [("out_file", "functional_data")],
-                ),
+                (wrangle_volumes, mask_functional, [("functional_file", "in_file")],),
+                (mask_functional, specify_model, [("out_file", "functional_runs")],),
+                (mask_functional, fit_model, [("out_file", "functional_data")],),
             ]
         )
 
     workflow.connect(
         [
-            (
-                get_info,
-                specify_model,
-                [("repetition_time", "time_repetition")],
-            ),
+            (get_info, specify_model, [("repetition_time", "time_repetition")],),
             (specify_model, fit_model, [("session_info", "session_info")]),
             (
                 get_info,
                 fit_model,
-                [
-                    ("repetition_time", "interscan_interval"),
-                    ("run_contrasts", "contrasts"),
-                ],
+                [("repetition_time", "interscan_interval"), ("run_contrasts", "contrasts")],
             ),
             (
                 fit_model,
@@ -514,21 +386,9 @@ def fsl_run_level_wf(
     if detrend_poly:
         workflow.connect(
             [
-                (
-                    generate_model,
-                    correct_matrices,
-                    [("design_file", "design_matrix")],
-                ),
-                (
-                    correct_matrices,
-                    plot_matrices,
-                    [("design_matrix", "mat_file")],
-                ),
-                (
-                    correct_matrices,
-                    estimate_model,
-                    [("design_matrix", "design_file")],
-                ),
+                (generate_model, correct_matrices, [("design_file", "design_matrix")],),
+                (correct_matrices, plot_matrices, [("design_matrix", "mat_file")],),
+                (correct_matrices, estimate_model, [("design_matrix", "design_file")],),
             ]
         )
 
@@ -536,11 +396,7 @@ def fsl_run_level_wf(
         workflow.connect(
             [
                 (generate_model, plot_matrices, [("design_file", "mat_file")]),
-                (
-                    generate_model,
-                    estimate_model,
-                    [("design_file", "design_file")],
-                ),
+                (generate_model, estimate_model, [("design_file", "design_file")],),
             ]
         )
 
@@ -550,11 +406,7 @@ def fsl_run_level_wf(
             (generate_model, plot_matrices, [("con_file", "con_file")]),
             (fit_model, estimate_model, [("functional_data", "in_file")]),
             (generate_model, estimate_model, [("con_file", "tcon_file")]),
-            (
-                estimate_model,
-                calculate_p,
-                [(("zstats", utils.flatten), "in_file")],
-            ),
+            (estimate_model, calculate_p, [(("zstats", utils.flatten), "in_file")],),
             (
                 estimate_model,
                 collate,
@@ -578,11 +430,7 @@ def fsl_run_level_wf(
                     ("contrast_metadata", "metadata"),
                 ],
             ),
-            (
-                collate_outputs,
-                ds_contrast_maps,
-                [("out", "in_file"), ("metadata", "entities")],
-            ),
+            (collate_outputs, ds_contrast_maps, [("out", "in_file"), ("metadata", "entities")],),
             (
                 collate_outputs,
                 wrangle_outputs,
@@ -634,11 +482,7 @@ def fsl_higher_level_wf(
     )
 
     get_info = pe.Node(
-        GenerateHigherInfo(
-            model=step,
-            database_path=database_path,
-            align_volumes=align_volumes,
-        ),
+        GenerateHigherInfo(model=step, database_path=database_path, align_volumes=align_volumes,),
         name=f"get_{level}_info",
     )
 
@@ -662,9 +506,7 @@ def fsl_higher_level_wf(
     )
 
     calculate_p = pe.MapNode(
-        fsl.ImageMaths(
-            output_type="NIFTI_GZ", op_string="-ztop", suffix="_pval"
-        ),
+        fsl.ImageMaths(output_type="NIFTI_GZ", op_string="-ztop", suffix="_pval"),
         iterfield=["in_file"],
         name=f"model_{level}_caculate_p",
     )
@@ -686,13 +528,7 @@ def fsl_higher_level_wf(
 
     collate_outputs = pe.Node(
         CollateWithMetadata(
-            fields=[
-                "effect_maps",
-                "variance_maps",
-                "zscore_maps",
-                "pvalue_maps",
-                "tstat_maps",
-            ],
+            fields=["effect_maps", "variance_maps", "zscore_maps", "pvalue_maps", "tstat_maps"],
             field_to_metadata_map={
                 "effect_maps": {"stat": "effect"},
                 "variance_maps": {"stat": "variance"},
@@ -712,9 +548,7 @@ def fsl_higher_level_wf(
     )
 
     wrangle_outputs = pe.Node(
-        IdentityInterface(
-            fields=["contrast_metadata", "contrast_maps", "brain_mask"]
-        ),
+        IdentityInterface(fields=["contrast_metadata", "contrast_maps", "brain_mask"]),
         name=f"wrangle_{level}_outputs",
     )
 
@@ -723,10 +557,7 @@ def fsl_higher_level_wf(
             (
                 wrangle_inputs,
                 get_info,
-                [
-                    ("contrast_metadata", "contrast_metadata"),
-                    ("contrast_maps", "contrast_maps"),
-                ],
+                [("contrast_metadata", "contrast_metadata"), ("contrast_maps", "contrast_maps")],
             ),
             (
                 get_info,
@@ -766,11 +597,7 @@ def fsl_higher_level_wf(
                     ("contrast_metadata", "metadata"),
                 ],
             ),
-            (
-                collate_outputs,
-                ds_contrast_maps,
-                [("out", "in_file"), ("metadata", "entities")],
-            ),
+            (collate_outputs, ds_contrast_maps, [("out", "in_file"), ("metadata", "entities")],),
             (
                 collate_outputs,
                 wrangle_outputs,

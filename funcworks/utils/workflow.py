@@ -40,9 +40,7 @@ def reshape_ra(run_info, functional_file, outlier_file, contrast_entities):
 
     run_dict = run_info.dictcopy()
     ntimepoints = nb.load(functional_file).get_fdata().shape[-1]
-    outlier_frame = pd.read_csv(
-        outlier_file, header=None, names=["outlier_index"]
-    )
+    outlier_frame = pd.read_csv(outlier_file, header=None, names=["outlier_index"])
     outlier_frame["outlier_index"] = outlier_frame["outlier_index"].astype(int)
     for i, row in outlier_frame.iterrows():
         run_dict["regressor_names"].append(f"rapidart{i:02d}")
@@ -71,19 +69,14 @@ def correct_matrix(design_matrix):
         content = dmr.readlines()
         matrix_index = content.index("/Matrix\n") + 1
     matrix_data = pd.read_csv(
-        design_matrix,
-        skiprows=matrix_index,
-        delim_whitespace=True,
-        header=None,
+        design_matrix, skiprows=matrix_index, delim_whitespace=True, header=None,
     )
     mat_rows, mat_cols = matrix_data.shape
     matrix_path = Path.cwd() / "run0.mat"
     if matrix_path.is_file():
         open(matrix_path, "w").close()
     with open(matrix_path, "a") as dma:
-        dma.writelines(
-            f"/NumWaves {mat_cols}\t\n/NumPoints {mat_rows}\t\n/Matrix\n"
-        )
+        dma.writelines(f"/NumWaves {mat_cols}\t\n/NumPoints {mat_rows}\t\n/Matrix\n")
     for idx, column in matrix_data.T.iterrows():
         if column.max() < 0.00000000000001:
             matrix_data[idx] = np.ones(len(matrix_data))

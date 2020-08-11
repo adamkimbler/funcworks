@@ -376,7 +376,7 @@ HANDLERS = {}
 
 
 def register_vcs_handler(vcs, method):  # decorator
-    """Decorator to mark a method as the handler for a particular VCS."""
+    """Mark a method as the handler for a particular VCS."""
 
     def decorate(f):
         """Store f in HANDLERS[vcs][method]."""
@@ -388,9 +388,7 @@ def register_vcs_handler(vcs, method):  # decorator
     return decorate
 
 
-def run_command(
-    commands, args, cwd=None, verbose=False, hide_stderr=False, env=None
-):
+def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=None):
     """Call the given command(s)."""
     assert isinstance(commands, list)
     p = None
@@ -431,7 +429,7 @@ def run_command(
 
 LONG_VERSION_PY[
     "git"
-] = '''
+] = r'''
 # This file helps to compute a version number in source trees obtained from
 # git-archive tarball (such as those provided by githubs download-from-tag
 # feature). Distribution tarballs (built by setup.py sdist) and build
@@ -1057,9 +1055,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
 
-    out, rc = run_command(
-        GITS, ["rev-parse", "--git-dir"], cwd=root, hide_stderr=True
-    )
+    out, rc = run_command(GITS, ["rev-parse", "--git-dir"], cwd=root, hide_stderr=True)
     if rc != 0:
         if verbose:
             print("Directory %s not under git control" % root)
@@ -1069,15 +1065,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = run_command(
         GITS,
-        [
-            "describe",
-            "--tags",
-            "--dirty",
-            "--always",
-            "--long",
-            "--match",
-            "%s*" % tag_prefix,
-        ],
+        ["describe", "--tags", "--dirty", "--always", "--long", "--match", "%s*" % tag_prefix],
         cwd=root,
     )
     # --long was added in git-1.5.5
@@ -1111,9 +1099,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         mo = re.search(r"^(.+)-(\d+)-g([0-9a-f]+)$", git_describe)
         if not mo:
             # unparseable. Maybe git-describe is misbehaving?
-            pieces["error"] = (
-                "unable to parse git-describe output: '%s'" % describe_out
-            )
+            pieces["error"] = "unable to parse git-describe output: '%s'" % describe_out
             return pieces
 
         # tag
@@ -1122,10 +1108,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
             if verbose:
                 fmt = "tag '%s' doesn't start with prefix '%s'"
                 print(fmt % (full_tag, tag_prefix))
-            pieces["error"] = "tag '%s' doesn't start with prefix '%s'" % (
-                full_tag,
-                tag_prefix,
-            )
+            pieces["error"] = "tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix,)
             return pieces
         pieces["closest-tag"] = full_tag[len(tag_prefix) :]
 
@@ -1138,15 +1121,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     else:
         # HEX: no tags
         pieces["closest-tag"] = None
-        count_out, rc = run_command(
-            GITS, ["rev-list", "HEAD", "--count"], cwd=root
-        )
+        count_out, rc = run_command(GITS, ["rev-list", "HEAD", "--count"], cwd=root)
         pieces["distance"] = int(count_out)  # total number of commits
 
     # commit date: see ISO-8601 comment in git_versions_from_keywords()
-    date = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"], cwd=root)[
-        0
-    ].strip()
+    date = run_command(GITS, ["show", "-s", "--format=%ci", "HEAD"], cwd=root)[0].strip()
     pieces["date"] = date.strip().replace(" ", "T", 1).replace(" ", "", 1)
 
     return pieces
@@ -1246,16 +1225,10 @@ def versions_from_file(filename):
             contents = f.read()
     except EnvironmentError:
         raise NotThisMethod("unable to read _version.py")
-    mo = re.search(
-        r"version_json = '''\n(.*)'''  # END VERSION_JSON",
-        contents,
-        re.M | re.S,
-    )
+    mo = re.search(r"version_json = '''\n(.*)'''  # END VERSION_JSON", contents, re.M | re.S,)
     if not mo:
         mo = re.search(
-            r"version_json = '''\r\n(.*)'''  # END VERSION_JSON",
-            contents,
-            re.M | re.S,
+            r"version_json = '''\r\n(.*)'''  # END VERSION_JSON", contents, re.M | re.S,
         )
     if not mo:
         raise NotThisMethod("no version_json in _version.py")
@@ -1265,9 +1238,7 @@ def versions_from_file(filename):
 def write_to_version_file(filename, versions):
     """Write the given version number to the given _version.py file."""
     os.unlink(filename)
-    contents = json.dumps(
-        versions, sort_keys=True, indent=1, separators=(",", ": ")
-    )
+    contents = json.dumps(versions, sort_keys=True, indent=1, separators=(",", ": "))
     with open(filename, "w") as f:
         f.write(SHORT_VERSION_PY % contents)
 
@@ -1468,9 +1439,7 @@ def get_versions(verbose=False):
     handlers = HANDLERS.get(cfg.VCS)
     assert handlers, "unrecognized VCS '%s'" % cfg.VCS
     verbose = verbose or cfg.verbose
-    assert (
-        cfg.versionfile_source is not None
-    ), "please set versioneer.versionfile_source"
+    assert cfg.versionfile_source is not None, "please set versioneer.versionfile_source"
     assert cfg.tag_prefix is not None, "please set versioneer.tag_prefix"
 
     versionfile_abs = os.path.join(root, cfg.versionfile_source)
@@ -1612,9 +1581,7 @@ def get_cmdclass():
             # now locate _version.py in the new build/ directory and replace
             # it with an updated value
             if cfg.versionfile_build:
-                target_versionfile = os.path.join(
-                    self.build_lib, cfg.versionfile_build
-                )
+                target_versionfile = os.path.join(self.build_lib, cfg.versionfile_build)
                 print("UPDATING %s" % target_versionfile)
                 write_to_version_file(target_versionfile, versions)
 
@@ -1713,9 +1680,7 @@ def get_cmdclass():
             # updated value
             target_versionfile = os.path.join(base_dir, cfg.versionfile_source)
             print("UPDATING %s" % target_versionfile)
-            write_to_version_file(
-                target_versionfile, self._versioneer_generated_versions
-            )
+            write_to_version_file(target_versionfile, self._versioneer_generated_versions)
 
     cmds["sdist"] = cmd_sdist
 
@@ -1767,19 +1732,13 @@ del get_versions
 
 
 def do_setup():
-    """Main VCS-independent setup function for installing Versioneer."""
+    """Setup function for installing Versioneer."""
     root = get_root()
     try:
         cfg = get_config_from_root(root)
-    except (
-        EnvironmentError,
-        configparser.NoSectionError,
-        configparser.NoOptionError,
-    ) as e:
+    except (EnvironmentError, configparser.NoSectionError, configparser.NoOptionError,) as e:
         if isinstance(e, (EnvironmentError, configparser.NoSectionError)):
-            print(
-                "Adding sample versioneer config to setup.cfg", file=sys.stderr
-            )
+            print("Adding sample versioneer config to setup.cfg", file=sys.stderr)
             with open(os.path.join(root, "setup.cfg"), "a") as f:
                 f.write(SAMPLE_CONFIG)
         print(CONFIG_ERROR, file=sys.stderr)
@@ -1841,10 +1800,7 @@ def do_setup():
     else:
         print(" 'versioneer.py' already in MANIFEST.in")
     if cfg.versionfile_source not in simple_includes:
-        print(
-            " appending versionfile_source ('%s') to MANIFEST.in"
-            % cfg.versionfile_source
-        )
+        print(" appending versionfile_source ('%s') to MANIFEST.in" % cfg.versionfile_source)
         with open(manifest_in, "a") as f:
             f.write("include %s\n" % cfg.versionfile_source)
     else:

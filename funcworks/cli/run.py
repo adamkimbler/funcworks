@@ -25,10 +25,7 @@ def check_deps(workflow):
     return sorted(
         (node.interface.__class__.__name__, node.interface._cmd)
         for node in workflow._get_all_nodes()
-        if (
-            hasattr(node.interface, "_cmd")
-            and which(node.interface._cmd.split()[0]) is None
-        )
+        if (hasattr(node.interface, "_cmd") and which(node.interface._cmd.split()[0]) is None)
     )
 
 
@@ -75,11 +72,7 @@ def get_parser():
 
     g_bids = parser.add_argument_group("Options to specify bids entities")
     g_bids.add_argument(
-        "-m",
-        "--model-file",
-        action="store",
-        type=Path,
-        help="Location of BIDS model file",
+        "-m", "--model-file", action="store", type=Path, help="Location of BIDS model file",
     )
     g_bids.add_argument(
         "-d",
@@ -149,14 +142,10 @@ def get_parser():
         "--smooth-autocorrelations",
         action="store_true",
         default=False,
-        help="Option to enable smoothing of autocorrelations "
-        "during run level analyses.",
+        help="Option to enable smoothing of autocorrelations " "during run level analyses.",
     )
     g_prep.add_argument(
-        "--despike",
-        default=False,
-        action="store_true",
-        help="Run afni despike on the data",
+        "--despike", default=False, action="store_true", help="Run afni despike on the data",
     )
 
     g_perf = parser.add_argument_group("Options to impact performance")
@@ -223,9 +212,7 @@ def main():
     missing = check_deps(funcworks_wf)
     if missing:
         error_msg = "Cannot run FUNCWorks. Missing dependencies:\n"
-        error_msg += "".join(
-            [f"\t{cmd} (Interface: {iface})" for iface, cmd in missing]
-        )
+        error_msg += "".join([f"\t{cmd} (Interface: {iface})" for iface, cmd in missing])
         raise ModuleNotFoundError(error_msg)
     # Clean up master process before running workflow, which may create forks
     gc.collect()
@@ -298,11 +285,7 @@ def build_workflow(opts, retval):
         build_log.error(
             "The selected output folder is the same as the input BIDS folder. "
             "Please modify the output path (suggestion: %s).",
-            (
-                bids_dir
-                / "derivatives"
-                / ("funcworks-%s" % __version__.split("+")[0])
-            ),
+            (bids_dir / "derivatives" / ("funcworks-%s" % __version__.split("+")[0])),
         )
         retval["return_code"] = 1
         return retval
@@ -328,7 +311,7 @@ def build_workflow(opts, retval):
     # Load base plugin_settings from file if --use-plugin
     plugin_settings = {
         "plugin": "MultiProc",
-        "plugin_args": {"raise_insufficient": False, "maxtasksperchild": 1,},
+        "plugin_args": {"raise_insufficient": False, "maxtasksperchild": 1},
     }
     if opts.use_plugin is not None:
         with open(opts.use_plugin) as f:

@@ -3,9 +3,7 @@
 from pathlib import Path
 import importlib.util
 
-spec = importlib.util.spec_from_file_location(
-    "_version", Path(__file__).parent / "_version.py"
-)
+spec = importlib.util.spec_from_file_location("_version", Path(__file__).parent / "_version.py")
 _version = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(_version)
 

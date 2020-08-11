@@ -79,18 +79,12 @@ def _ensure_model(model):
 
 
 class _BIDSDataSinkInputSpec(BaseInterfaceInputSpec):
-    base_directory = Directory(
-        mandatory=True, desc="Path to BIDS (or derivatives) root directory"
-    )
+    base_directory = Directory(mandatory=True, desc="Path to BIDS (or derivatives) root directory")
     in_file = InputMultiPath(File(exists=True), mandatory=True)
     entities = InputMultiPath(
-        traits.Dict,
-        usedefault=True,
-        desc="Per-file entities to include in filename",
+        traits.Dict, usedefault=True, desc="Per-file entities to include in filename",
     )
-    fixed_entities = traits.Dict(
-        usedefault=True, desc="Entities to include in all filenames"
-    )
+    fixed_entities = traits.Dict(usedefault=True, desc="Entities to include in all filenames")
     path_patterns = InputMultiPath(
         traits.Str, desc="BIDS path patterns describing format of file names"
     )
@@ -125,9 +119,7 @@ class BIDSDataSink(IOBase):
             path_patterns = None
 
         out_files = []
-        for entities, in_file in zip(
-            self.inputs.entities, self.inputs.in_file
-        ):
+        for entities, in_file in zip(self.inputs.entities, self.inputs.in_file):
             ents = {**self.inputs.fixed_entities}
             ents.update(entities)
 
@@ -172,15 +164,10 @@ def _copy_or_convert(in_file, out_file):
 
 
 class _BIDSGetInputSpec(BaseInterfaceInputSpec):
-    database_path = Directory(
-        exists=True, mandatory=True, desc="Path to BIDS Dataset DBCACHE"
-    )
+    database_path = Directory(exists=True, mandatory=True, desc="Path to BIDS Dataset DBCACHE")
     fixed_entities = traits.Dict(desc="Queries for outfield outputs")
     align_volumes = traits.Either(
-        traits.Int,
-        None,
-        default=None,
-        desc="Run reference to align functional volumes",
+        traits.Int, None, default=None, desc="Run reference to align functional volumes",
     )
 
 
@@ -256,8 +243,7 @@ class BIDSGet(SimpleInterface):
             )
             if self.inputs.align_volumes and "run" not in ents:
                 raise ValueError(
-                    f"Attempted to align to when run entity is not present in "
-                    f"{file.path}."
+                    f"Attempted to align to when run entity is not present in " f"{file.path}."
                 )
             elif self.inputs.align_volumes:
                 file_ents["mask"]["run"] = self.inputs.align_volumes
@@ -277,8 +263,7 @@ class BIDSGet(SimpleInterface):
                     )
                 elif len(files) == 0:
                     raise FileNotFoundError(
-                        f"No {filetype} found for given entities "
-                        f"{entities}"
+                        f"No {filetype} found for given entities " f"{entities}"
                     )
                 else:
                     outputs[f"{filetype}_files"].append(files[0])

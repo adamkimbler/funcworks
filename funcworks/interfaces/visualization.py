@@ -20,12 +20,8 @@ sns.set_style("white")
 class _PlotMatricesInputSpec(BaseInterfaceInputSpec):
     run_info = traits.Any(desc="List of regressors of no interest")
     mat_file = File(exists=True, desc="Matrix File produced by Generate Model")
-    con_file = File(
-        exists=True, desc="Contrast File Produces by Generate Model"
-    )
-    database_path = Directory(
-        exists=True, desc="Database path for current model"
-    )
+    con_file = File(exists=True, desc="Contrast File Produces by Generate Model")
+    database_path = Directory(exists=True, desc="Database path for current model")
     entities = traits.Dict(desc="Dictionary containing BIDS file entities")
     output_dir = Directory(desc="Directory for Output")
 
@@ -33,12 +29,8 @@ class _PlotMatricesInputSpec(BaseInterfaceInputSpec):
 class _PlotMatricesOutputSpec(TraitedSpec):
     design_matrix = traits.Any(desc="Path to design matrix")
     design_plot = File(desc="SVG File containing the plotted Design Matrix")
-    contrasts_plot = File(
-        desc="SVG File containing the plotted Contrast Matrix"
-    )
-    correlation_plot = File(
-        desc="SVG File containing the plotted Correlation Matrix"
-    )
+    contrasts_plot = File(desc="SVG File containing the plotted Contrast Matrix")
+    correlation_plot = File(desc="SVG File containing the plotted Correlation Matrix")
 
 
 class PlotMatrices(IOBase):
@@ -100,9 +92,7 @@ class PlotMatrices(IOBase):
             layout=layout,
         )
         ents.update({"suffix": "design"})
-        design_path = layout.build_path(
-            ents, path_patterns=design_matrix_patt, validate=False
-        )
+        design_path = layout.build_path(ents, path_patterns=design_matrix_patt, validate=False)
         design_path = output_dir / design_path
         design_path.parent.mkdir(exist_ok=True, parents=True)
         design_matrix.to_csv(design_path, sep="\t", index=None)
@@ -119,20 +109,14 @@ class PlotMatrices(IOBase):
         with open(mat_file, "r") as matf:
             content = matf.readlines()
         design_matrix = pd.read_csv(
-            mat_file,
-            skiprows=content.index("/Matrix\n") + 1,
-            delim_whitespace=True,
-            header=None,
+            mat_file, skiprows=content.index("/Matrix\n") + 1, delim_whitespace=True, header=None,
         )
         with open(con_file, "r") as matf:
             content = matf.readlines()
         contrast_names = [x for x in content if "ContrastName" in x]
         contrast_names = [x.split("\t")[-1] for x in contrast_names]
         contrast_matrix = pd.read_csv(
-            con_file,
-            skiprows=content.index("/Matrix\n") + 1,
-            delim_whitespace=True,
-            header=None,
+            con_file, skiprows=content.index("/Matrix\n") + 1, delim_whitespace=True, header=None,
         )
 
         design_matrix.columns = regressor_names + confound_names
@@ -142,9 +126,7 @@ class PlotMatrices(IOBase):
 
         return design_matrix, corr_matrix, contrast_matrix
 
-    def _plot_matrix(
-        self, matrix, path_pattern, suffix=None, cmap="viridis", layout=None
-    ):
+    def _plot_matrix(self, matrix, path_pattern, suffix=None, cmap="viridis", layout=None):
         fig = plt.figure(figsize=(14, 10))
         vmax = np.abs(matrix.values).max()
         sns.heatmap(
@@ -157,9 +139,7 @@ class PlotMatrices(IOBase):
         )
         entities = self.inputs.entities
         entities.update({"suffix": suffix})
-        fig_path = layout.build_path(
-            entities, path_patterns=path_pattern, validate=False
-        )
+        fig_path = layout.build_path(entities, path_patterns=path_pattern, validate=False)
         fig_path = Path(self.inputs.output_dir) / fig_path
         fig_path.parent.mkdir(exist_ok=True, parents=True)
         plt.savefig(fig_path, bbox_inches="tight")
@@ -168,12 +148,7 @@ class PlotMatrices(IOBase):
         return fig_path
 
     def _plot_corr_matrix(
-        self,
-        corr_matrix,
-        path_pattern,
-        regressor_names,
-        cmap=None,
-        layout=None,
+        self, corr_matrix, path_pattern, regressor_names, cmap=None, layout=None,
     ):
         fig = plt.figure(figsize=(10, 10))
         plot = sns.heatmap(
@@ -195,9 +170,7 @@ class PlotMatrices(IOBase):
         plot.vlines([len(regressor_names)], 0, len(regressor_names))
         entities = self.inputs.entities
         entities.update({"suffix": "corr"})
-        fig_path = layout.build_path(
-            entities, path_patterns=path_pattern, validate=False
-        )
+        fig_path = layout.build_path(entities, path_patterns=path_pattern, validate=False)
         fig_path = Path(self.inputs.output_dir) / fig_path
         fig_path.parent.mkdir(exist_ok=True, parents=True)
         plt.savefig(fig_path, bbox_inches="tight")

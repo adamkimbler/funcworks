@@ -10,8 +10,5 @@ if __name__ == "__main__":
     cmdclass = versioneer.get_cmdclass()
 
     setup(
-        name="funcworks",
-        version=__version__,
-        cmdclass=cmdclass,
-        download_url=DOWNLOAD_URL,
+        name="funcworks", version=__version__, cmdclass=cmdclass, download_url=DOWNLOAD_URL,
     )
