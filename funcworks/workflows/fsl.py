@@ -30,7 +30,7 @@ def fsl_run_level_wf(
     align_volumes=None,
     smooth_autocorrelations=False,
     despike=False,
-    name="fsl_run_level_wf"
+    name="fsl_run_level_wf",
 ):
     """Generate run level workflow for a given model."""
     bids_dir = Path(bids_dir)
